@@ -1,0 +1,7 @@
+package controller
+
+// Context interface for controllers
+type Context interface {
+	JSON(code int, i interface{}) error
+	Bind(i interface{}) error
+}
