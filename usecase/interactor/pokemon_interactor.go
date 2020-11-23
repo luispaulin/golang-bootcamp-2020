@@ -17,7 +17,10 @@ type PokemonInteractor interface {
 }
 
 // NewPokemonInteractor constructor
-func NewPokemonInteractor(r repository.PokemonRepository, p presenter.PokemonPresenter) PokemonInteractor {
+// TODO: Good looking?
+func NewPokemonInteractor(
+	r repository.PokemonRepository,
+	p presenter.PokemonPresenter) PokemonInteractor {
 	return &pokemonInteractor{r, p}
 }
 
