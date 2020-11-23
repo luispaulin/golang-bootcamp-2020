@@ -10,12 +10,12 @@ type registry struct {
 	file *os.File
 }
 
-// TODO: better comment
+// Registry interface to initialize layers
 type Registry interface {
 	NewAppController() controller.AppController
 }
 
-// TODO: better comment
+// NewRegistry with data file
 func NewRegistry(file *os.File) Registry {
 	return &registry{file}
 }
