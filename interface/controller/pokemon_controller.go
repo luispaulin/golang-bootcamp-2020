@@ -14,6 +14,7 @@ type pokemonController struct {
 // PokemonController interface
 type PokemonController interface {
 	GetPokemons(c Context) error
+	SyncPokemons(c Context) error
 }
 
 // NewPokemonController constructor
@@ -30,4 +31,17 @@ func (pc *pokemonController) GetPokemons(c Context) error {
 	}
 
 	return c.JSON(http.StatusOK, pokemons)
+}
+
+func (pc *pokemonController) SyncPokemons(c Context) error {
+
+	message, err := pc.pokemonInteractor.REFRESH()
+
+	if err != nil {
+		return err
+	}
+
+	// TODO handle different possible status
+
+	return c.JSON(http.StatusOK, message)
 }

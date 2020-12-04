@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// Init file reader
-	file, err := datastore.NewDB()
+	file, client, err := datastore.NewDB()
 
 	if err != nil {
 		panic(err)
@@ -20,7 +20,7 @@ func main() {
 	defer file.Close()
 
 	// Init registry
-	r := registry.NewRegistry(file)
+	r := registry.NewRegistry(file, client)
 
 	// Init router
 	e := echo.New()
