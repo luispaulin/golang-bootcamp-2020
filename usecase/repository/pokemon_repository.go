@@ -7,5 +7,5 @@ import (
 // PokemonRepository use case inerface
 type PokemonRepository interface {
 	FindAll(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
-	Sync() (string, error)
+	Sync() (string, int, error)
 }

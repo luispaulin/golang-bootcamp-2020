@@ -16,7 +16,7 @@ type pokemonRepository struct {
 // PokemonRepository for interface
 type PokemonRepository interface {
 	FindAll(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
-	Sync() (string, error)
+	Sync() (string, int, error)
 }
 
 // NewPokemonRepository for interface
@@ -39,7 +39,7 @@ func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemo
 	return pokemons, nil
 }
 
-func (pr *pokemonRepository) Sync() (string, error) {
+func (pr *pokemonRepository) Sync() (string, int, error) {
 
 	var pokemons []*model.Pokemon
 	// TODO this struct here?
@@ -60,27 +60,27 @@ func (pr *pokemonRepository) Sync() (string, error) {
 		Get("https://pokeapi.co/api/v2/pokemon")
 
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
 	// Check if request status successfull
 	if !resp.IsSuccess() {
-		return resp.Status(), nil
+		return resp.Status(), resp.StatusCode(), nil
 	}
 
 	if err := pr.file.Truncate(0); err != nil {
-		return "", err
+		return "", 0, err
 	}
 
 	// Set writer at file's beginning
 	if _, err := pr.file.Seek(0, 0); err != nil {
-		return "", err
+		return "", 0, err
 	}
 
 	// Write collection into csv format
 	if err := gocsv.MarshalFile(&pokemons, pr.file); err != nil {
-		return "", err
+		return "", 0, err
 	}
 
-	return resp.Status(), nil
+	return resp.Status(), resp.StatusCode(), nil
 }

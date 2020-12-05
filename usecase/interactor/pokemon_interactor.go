@@ -14,7 +14,7 @@ type pokemonInteractor struct {
 // PokemonInteractor for pokemons use cases
 type PokemonInteractor interface {
 	Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
-	Refresh() (string, error)
+	Refresh() (string, int, error)
 }
 
 // NewPokemonInteractor constructor
@@ -35,12 +35,12 @@ func (po *pokemonInteractor) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, e
 }
 
 //
-func (po *pokemonInteractor) Refresh() (string, error) {
-	message, err := po.pokemonRepository.Sync()
+func (po *pokemonInteractor) Refresh() (string, int, error) {
+	message, code, err := po.pokemonRepository.Sync()
 
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
-	return message, nil
+	return message, code, nil
 }

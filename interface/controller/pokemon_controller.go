@@ -35,13 +35,11 @@ func (pc *pokemonController) GetPokemons(c Context) error {
 
 func (pc *pokemonController) SyncPokemons(c Context) error {
 
-	message, err := pc.pokemonInteractor.Refresh()
+	message, code, err := pc.pokemonInteractor.Refresh()
 
 	if err != nil {
 		return err
 	}
 
-	// TODO handle different possible status
-
-	return c.JSON(http.StatusOK, message)
+	return c.JSON(code, message)
 }
