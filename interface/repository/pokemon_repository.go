@@ -31,6 +31,15 @@ func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemo
 		return nil, err
 	}
 
+	// Check if empty file
+	fileInfo, err := pr.file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if fileInfo.Size() == 0 {
+		return nil, nil
+	}
+
 	// Parses csv file info to pokemon slice
 	if err := gocsv.UnmarshalFile(pr.file, &pokemons); err != nil {
 		return nil, err
