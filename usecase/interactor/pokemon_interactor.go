@@ -13,19 +13,18 @@ type pokemonInteractor struct {
 
 // PokemonInteractor for pokemons use cases
 type PokemonInteractor interface {
-	GET(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
-	REFRESH() (string, error)
+	Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
+	Refresh() (string, error)
 }
 
 // NewPokemonInteractor constructor
-// TODO: Good looking?
 func NewPokemonInteractor(
 	r repository.PokemonRepository,
 	p presenter.PokemonPresenter) PokemonInteractor {
 	return &pokemonInteractor{r, p}
 }
 
-func (po *pokemonInteractor) GET(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
+func (po *pokemonInteractor) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
 	pokemons, err := po.pokemonRepository.FindAll(pokemons)
 
 	if err != nil {
@@ -35,8 +34,8 @@ func (po *pokemonInteractor) GET(pokemons []*model.Pokemon) ([]*model.Pokemon, e
 	return po.pokemonPresenter.ResponsePokemons(pokemons), nil
 }
 
-// TODO improve this layer
-func (po *pokemonInteractor) REFRESH() (string, error) {
+//
+func (po *pokemonInteractor) Refresh() (string, error) {
 	message, err := po.pokemonRepository.Sync()
 
 	if err != nil {

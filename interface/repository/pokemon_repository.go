@@ -26,6 +26,7 @@ func NewPokemonRepository(db *os.File, client *resty.Client) PokemonRepository {
 
 func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
 
+	// Set reader t file's beginning
 	if _, err := pr.file.Seek(0, 0); err != nil {
 		return nil, err
 	}
@@ -46,9 +47,11 @@ func (pr *pokemonRepository) Sync() (string, error) {
 		Results *[]*model.Pokemon `json:"results"`
 	}
 
+	// Create response struct
 	result := Response{&pokemons}
 
 	// TODO Handle better place for api url
+	// Request to external API
 	resp, err := pr.client.R().
 		EnableTrace().
 		SetQueryString("limit=2000").
@@ -60,35 +63,22 @@ func (pr *pokemonRepository) Sync() (string, error) {
 		return "", err
 	}
 
-	// TODO correct http error status raising?
+	// Check if request status successfull
 	if !resp.IsSuccess() {
 		return resp.Status(), nil
 	}
 
-	if err != nil {
+	if err := pr.file.Truncate(0); err != nil {
 		return "", err
 	}
 
-	err = pr.file.Truncate(0)
-
-	if err != nil {
-		return "", err
-	}
-
-	csvContent, err := gocsv.MarshalString(&pokemons)
-
-	if err != nil {
-		return "", err
-	}
-
+	// Set writer at file's beginning
 	if _, err := pr.file.Seek(0, 0); err != nil {
 		return "", err
 	}
 
-	//err = gocsv.MarshalFile(&pokemons, pr.file)
-	_, err = pr.file.WriteString(csvContent)
-
-	if err != nil {
+	// Write collection into csv format
+	if err := gocsv.MarshalFile(&pokemons, pr.file); err != nil {
 		return "", err
 	}
 

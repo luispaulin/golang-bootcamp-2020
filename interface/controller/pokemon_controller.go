@@ -25,7 +25,7 @@ func NewPokemonController(pin interactor.PokemonInteractor) PokemonController {
 func (pc *pokemonController) GetPokemons(c Context) error {
 	var pokemons []*model.Pokemon
 
-	pokemons, err := pc.pokemonInteractor.GET(pokemons)
+	pokemons, err := pc.pokemonInteractor.Get(pokemons)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func (pc *pokemonController) GetPokemons(c Context) error {
 
 func (pc *pokemonController) SyncPokemons(c Context) error {
 
-	message, err := pc.pokemonInteractor.REFRESH()
+	message, err := pc.pokemonInteractor.Refresh()
 
 	if err != nil {
 		return err
