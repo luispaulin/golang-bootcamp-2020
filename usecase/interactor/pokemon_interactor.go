@@ -24,6 +24,7 @@ func NewPokemonInteractor(
 	return &pokemonInteractor{r, p}
 }
 
+// Get pokemons from datastore
 func (po *pokemonInteractor) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
 	pokemons, err := po.pokemonRepository.FindAll(pokemons)
 
@@ -34,7 +35,7 @@ func (po *pokemonInteractor) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, e
 	return po.pokemonPresenter.ResponsePokemons(pokemons), nil
 }
 
-//
+// Refresh data operation with external source
 func (po *pokemonInteractor) Refresh() (string, int, error) {
 	message, code, err := po.pokemonRepository.Sync()
 

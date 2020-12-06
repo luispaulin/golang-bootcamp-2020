@@ -8,6 +8,11 @@ import (
 	"github.com/luispaulin/api-challenge/domain/model"
 )
 
+// Response struct for external API
+type Response struct {
+	Results *[]*model.Pokemon `json:"results"`
+}
+
 type pokemonRepository struct {
 	file   *os.File
 	client *resty.Client
@@ -25,8 +30,7 @@ func NewPokemonRepository(db *os.File, client *resty.Client) PokemonRepository {
 }
 
 func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
-
-	// Set reader t file's beginning
+	// Set reader at file's beginning
 	if _, err := pr.file.Seek(0, 0); err != nil {
 		return nil, err
 	}
@@ -49,12 +53,7 @@ func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemo
 }
 
 func (pr *pokemonRepository) Sync() (string, int, error) {
-
 	var pokemons []*model.Pokemon
-	// TODO this struct here?
-	type Response struct {
-		Results *[]*model.Pokemon `json:"results"`
-	}
 
 	// Create response struct
 	result := Response{&pokemons}

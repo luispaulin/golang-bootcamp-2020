@@ -34,7 +34,6 @@ func (pc *pokemonController) GetPokemons(c Context) error {
 }
 
 func (pc *pokemonController) SyncPokemons(c Context) error {
-
 	message, code, err := pc.pokemonInteractor.Refresh()
 
 	if err != nil {
