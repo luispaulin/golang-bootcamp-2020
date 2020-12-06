@@ -22,6 +22,7 @@ func NewPokemonController(pin interactor.PokemonInteractor) PokemonController {
 	return &pokemonController{pin}
 }
 
+// GetPokemons list to JSON
 func (pc *pokemonController) GetPokemons(c Context) error {
 	var pokemons []*model.Pokemon
 

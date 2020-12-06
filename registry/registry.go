@@ -23,6 +23,7 @@ func NewRegistry(file *os.File, client *resty.Client) Registry {
 	return &registry{file, client}
 }
 
+// NewAppController creation
 func (r *registry) NewAppController() controller.AppController {
 	return r.NewPokemonController()
 }
