@@ -3,9 +3,10 @@ package repository
 import (
 	"os"
 
+	"github.com/luispaulin/api-challenge/domain/model"
+
 	resty "github.com/go-resty/resty/v2"
 	"github.com/gocarina/gocsv"
-	"github.com/luispaulin/api-challenge/domain/model"
 )
 
 // Response struct for external API
@@ -29,6 +30,7 @@ func NewPokemonRepository(db *os.File, client *resty.Client) PokemonRepository {
 	return &pokemonRepository{db, client}
 }
 
+// FindAll pokemons from CSV file
 func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
 	// Set reader at file's beginning
 	if _, err := pr.file.Seek(0, 0); err != nil {
@@ -52,6 +54,7 @@ func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemo
 	return pokemons, nil
 }
 
+// Sync CSV file with response from external API
 func (pr *pokemonRepository) Sync() (string, int, error) {
 	var pokemons []*model.Pokemon
 

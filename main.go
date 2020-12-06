@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/labstack/echo"
 	"github.com/luispaulin/api-challenge/datastore"
 	"github.com/luispaulin/api-challenge/registry"
 	"github.com/luispaulin/api-challenge/router"
+
+	"github.com/labstack/echo"
 )
 
 func main() {

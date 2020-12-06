@@ -1,9 +1,10 @@
 package router
 
 import (
+	"github.com/luispaulin/api-challenge/interface/controller"
+
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/luispaulin/api-challenge/interface/controller"
 )
 
 // NewRouter to register endpoints

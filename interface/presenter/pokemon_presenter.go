@@ -14,6 +14,7 @@ func NewPokemonPresenter() PokemonPresenter {
 	return &pokemonPresenter{}
 }
 
+// ResponsePokemons to controller's format
 func (pp *pokemonPresenter) ResponsePokemons(pokemons []*model.Pokemon) []*model.Pokemon {
 	if pokemons == nil {
 		pokemons = make([]*model.Pokemon, 0)

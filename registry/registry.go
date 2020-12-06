@@ -3,8 +3,9 @@ package registry
 import (
 	"os"
 
-	resty "github.com/go-resty/resty/v2"
 	"github.com/luispaulin/api-challenge/interface/controller"
+
+	resty "github.com/go-resty/resty/v2"
 )
 
 type registry struct {
