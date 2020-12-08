@@ -1,8 +1,6 @@
 package repository
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestFindAll(t *testing.T) {
 
