@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/luispaulin/api-challenge/domain/model"
@@ -9,13 +11,29 @@ import (
 	"github.com/gocarina/gocsv"
 )
 
-// Response struct for external API
-type Response struct {
+type response struct {
 	Results *[]*model.Pokemon `json:"results"`
 }
 
+type errorHTTP struct {
+	status string
+	code   int
+}
+
+func (he *errorHTTP) Error() string {
+	return fmt.Sprintf("Http error: %v, %v", he.status, he.code)
+}
+
 type pokemonRepository struct {
-	file   *os.File
+	localSource  *localSource
+	remoteSource *remoteSource
+}
+
+type localSource struct {
+	file *os.File
+}
+
+type remoteSource struct {
 	client *resty.Client
 }
 
@@ -25,20 +43,25 @@ type PokemonRepository interface {
 	Sync() (string, int, error)
 }
 
-// NewPokemonRepository for interface
-func NewPokemonRepository(db *os.File, client *resty.Client) PokemonRepository {
-	return &pokemonRepository{db, client}
+// LocalSource for reading and writing
+type LocalSource interface {
+	Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
+	Write(pokemons []*model.Pokemon) error
 }
 
-// FindAll pokemons from CSV file
-func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
+// RemoteSource for just reading
+type RemoteSource interface {
+	Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
+}
+
+func (ls *localSource) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
 	// Set reader at file's beginning
-	if _, err := pr.file.Seek(0, 0); err != nil {
+	if _, err := ls.file.Seek(0, 0); err != nil {
 		return nil, err
 	}
 
 	// Check if empty file
-	fileInfo, err := pr.file.Stat()
+	fileInfo, err := ls.file.Stat()
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +70,67 @@ func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemo
 	}
 
 	// Parses csv file info to pokemon slice
-	if err := gocsv.UnmarshalFile(pr.file, &pokemons); err != nil {
+	if err := gocsv.UnmarshalFile(ls.file, &pokemons); err != nil {
+		return nil, err
+	}
+
+	return pokemons, nil
+}
+
+func (ls *localSource) Write(pokemons []*model.Pokemon) error {
+	// Delete previous content
+	if err := ls.file.Truncate(0); err != nil {
+		return err
+	}
+
+	// Set writer at file's beginning
+	if _, err := ls.file.Seek(0, 0); err != nil {
+		return err
+	}
+
+	// Write data in file
+	if err := gocsv.MarshalFile(&pokemons, ls.file); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (rs *remoteSource) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
+	// Create response struct
+	result := response{&pokemons}
+
+	// TODO Handle better place for api url
+	// Request to external API
+	resp, err := rs.client.R().
+		EnableTrace().
+		SetQueryString("limit=2000").
+		ForceContentType("application/json").
+		SetResult(&result).
+		Get("https://pokeapi.co/api/v2/pokemon")
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if request status successfull
+	if !resp.IsSuccess() {
+		return nil, &errorHTTP{resp.Status(), resp.StatusCode()}
+	}
+
+	return pokemons, nil
+}
+
+// NewPokemonRepository for interface
+func NewPokemonRepository(db *os.File, client *resty.Client) PokemonRepository {
+	return &pokemonRepository{&localSource{db}, &remoteSource{client}}
+}
+
+// FindAll pokemons from CSV file
+func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
+	pokemons, err := pr.localSource.Get(pokemons)
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -58,40 +141,17 @@ func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemo
 func (pr *pokemonRepository) Sync() (string, int, error) {
 	var pokemons []*model.Pokemon
 
-	// Create response struct
-	result := Response{&pokemons}
+	pokemons, err := pr.remoteSource.Get(pokemons)
 
-	// TODO Handle better place for api url
-	// Request to external API
-	resp, err := pr.client.R().
-		EnableTrace().
-		SetQueryString("limit=2000").
-		ForceContentType("application/json").
-		SetResult(&result).
-		Get("https://pokeapi.co/api/v2/pokemon")
-
-	if err != nil {
+	if e, ok := err.(*errorHTTP); ok {
+		return e.status, e.code, e
+	} else if err != nil {
 		return "", 0, err
 	}
 
-	// Check if request status successfull
-	if !resp.IsSuccess() {
-		return resp.Status(), resp.StatusCode(), nil
-	}
-
-	if err := pr.file.Truncate(0); err != nil {
+	if err := pr.localSource.Write(pokemons); err != nil {
 		return "", 0, err
 	}
 
-	// Set writer at file's beginning
-	if _, err := pr.file.Seek(0, 0); err != nil {
-		return "", 0, err
-	}
-
-	// Write collection into csv format
-	if err := gocsv.MarshalFile(&pokemons, pr.file); err != nil {
-		return "", 0, err
-	}
-
-	return resp.Status(), resp.StatusCode(), nil
+	return "Ok", http.StatusOK, nil
 }
