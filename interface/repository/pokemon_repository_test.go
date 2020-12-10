@@ -2,6 +2,6 @@ package repository
 
 import "testing"
 
-func TestFindAll(t *testing.T) {
+func Test_PokemonRepository_FindAll(t *testing.T) {
 
 }
