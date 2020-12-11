@@ -20,13 +20,14 @@ type errorHTTP struct {
 	code   int
 }
 
+// Error string returned
 func (he *errorHTTP) Error() string {
 	return fmt.Sprintf("Http error: %v, %v", he.status, he.code)
 }
 
 type pokemonRepository struct {
-	localSource  *localSource
-	remoteSource *remoteSource
+	localSource  LocalSource
+	remoteSource RemoteSource
 }
 
 type localSource struct {
@@ -54,6 +55,7 @@ type RemoteSource interface {
 	Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
 }
 
+// Get pokemons from CSV file
 func (ls *localSource) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
 	// Set reader at file's beginning
 	if _, err := ls.file.Seek(0, 0); err != nil {
@@ -77,6 +79,7 @@ func (ls *localSource) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error) 
 	return pokemons, nil
 }
 
+// Write pokemons to CSV file
 func (ls *localSource) Write(pokemons []*model.Pokemon) error {
 	// Delete previous content
 	if err := ls.file.Truncate(0); err != nil {
@@ -96,6 +99,7 @@ func (ls *localSource) Write(pokemons []*model.Pokemon) error {
 	return nil
 }
 
+// Get pokemons from external API
 func (rs *remoteSource) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
 	// Create response struct
 	result := response{&pokemons}
@@ -126,7 +130,7 @@ func NewPokemonRepository(db *os.File, client *resty.Client) PokemonRepository {
 	return &pokemonRepository{&localSource{db}, &remoteSource{client}}
 }
 
-// FindAll pokemons from CSV file
+// FindAll pokemons from local source
 func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
 	pokemons, err := pr.localSource.Get(pokemons)
 
@@ -137,7 +141,7 @@ func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemo
 	return pokemons, nil
 }
 
-// Sync CSV file with response from external API
+// Sync Clocal source with external source
 func (pr *pokemonRepository) Sync() (string, int, error) {
 	var pokemons []*model.Pokemon
 
