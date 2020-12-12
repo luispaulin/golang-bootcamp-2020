@@ -35,7 +35,8 @@ type localSource struct {
 }
 
 type remoteSource struct {
-	client *resty.Client
+	client      *resty.Client
+	getEndpoint string
 }
 
 // PokemonRepository for interface
@@ -111,7 +112,7 @@ func (rs *remoteSource) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
 		SetQueryString("limit=2000").
 		ForceContentType("application/json").
 		SetResult(&result).
-		Get("https://pokeapi.co/api/v2/pokemon")
+		Get(rs.getEndpoint)
 
 	if err != nil {
 		return nil, err
@@ -127,7 +128,10 @@ func (rs *remoteSource) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
 
 // NewPokemonRepository for interface
 func NewPokemonRepository(db *os.File, client *resty.Client) PokemonRepository {
-	return &pokemonRepository{&localSource{db}, &remoteSource{client}}
+	return &pokemonRepository{
+		&localSource{db},
+		&remoteSource{client, "pokemon"},
+	}
 }
 
 // FindAll pokemons from local source

@@ -19,7 +19,7 @@ func NewDB() (*os.File, *resty.Client, error) {
 		return nil, nil, err
 	}
 
-	client := resty.New()
+	client := resty.New().SetHostURL("https://pokeapi.co/api/v2/")
 
 	return file, client, nil
 }

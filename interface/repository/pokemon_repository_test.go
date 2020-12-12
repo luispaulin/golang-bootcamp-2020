@@ -7,6 +7,7 @@ import (
 
 	"github.com/luispaulin/api-challenge/domain/model"
 
+	resty "github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -160,5 +161,44 @@ func Test_PokemonRepository_Sync(t *testing.T) {
 			assert.Equal(t, tt.codeOutput, code)
 		})
 	}
+}
 
+func Test_RemoteSource_Get(t *testing.T) {
+	pokemonsEmpty := make([]*model.Pokemon, 0)
+
+	tests := []struct {
+		name           string
+		pokemonsInput  []*model.Pokemon
+		pokemonsOutput []*model.Pokemon
+		errorOutput    error
+	}{
+		{
+			name:           "Remote source succesfull get",
+			pokemonsInput:  pokemonsEmpty,
+			pokemonsOutput: pokemonsSample,
+			errorOutput:    nil,
+		},
+		{
+			name:           "Remote source get not found",
+			pokemonsInput:  pokemonsEmpty,
+			pokemonsOutput: nil,
+			errorOutput:    &errorHTTP{"404 Not Found", http.StatusNotFound},
+		},
+	}
+
+	client := resty.New().SetHostURL("https://pokeapi.co/api/v2/")
+	remoteSrc := remoteSource{client, "pokemon"}
+
+	for _, tt := range tests {
+		if _, ok := tt.errorOutput.(*errorHTTP); ok {
+			remoteSrc.getEndpoint = "poke"
+		}
+		result, err := remoteSrc.Get(tt.pokemonsInput)
+		assert.Equal(t, tt.errorOutput, err)
+		if tt.pokemonsOutput != nil {
+			assert.NotNil(t, result)
+		} else {
+			assert.Nil(t, result)
+		}
+	}
 }
