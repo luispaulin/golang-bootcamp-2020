@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 
@@ -13,16 +12,6 @@ import (
 
 type response struct {
 	Results *[]*model.Pokemon `json:"results"`
-}
-
-type errorHTTP struct {
-	status string
-	code   int
-}
-
-// Error string returned
-func (he *errorHTTP) Error() string {
-	return fmt.Sprintf("Http error: %v, %v", he.status, he.code)
 }
 
 type pokemonRepository struct {
@@ -149,14 +138,17 @@ func (pr *pokemonRepository) FindAll(pokemons []*model.Pokemon) ([]*model.Pokemo
 func (pr *pokemonRepository) Sync() (string, int, error) {
 	var pokemons []*model.Pokemon
 
+	// Get pokemons from remote source
 	pokemons, err := pr.remoteSource.Get(pokemons)
 
+	// Return error or failed HTTP response
 	if e, ok := err.(*errorHTTP); ok {
 		return e.status, e.code, nil
 	} else if err != nil {
 		return "", 0, err
 	}
 
+	// Write pokemons to local source
 	if err := pr.localSource.Write(pokemons); err != nil {
 		return "", 0, err
 	}

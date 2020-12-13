@@ -8,7 +8,8 @@ import (
 
 // NewDB contructor with csv file and external API
 func NewDB() (*os.File, *resty.Client, error) {
-	//TODO Set file path with a Config
+	// TODO Set file path with a Config
+	// Open pokemon csv file
 	file, err := os.OpenFile(
 		"datastore/pokemons.csv",
 		os.O_RDWR|os.O_CREATE,
@@ -19,6 +20,7 @@ func NewDB() (*os.File, *resty.Client, error) {
 		return nil, nil, err
 	}
 
+	// HTTP client for pokemon API
 	client := resty.New().SetHostURL("https://pokeapi.co/api/v2/")
 
 	return file, client, nil
