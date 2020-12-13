@@ -122,7 +122,7 @@ func Test_PokemonRepository_Sync(t *testing.T) {
 			name:           "Not successful response from source",
 			statusOutput:   "Not found",
 			codeOutput:     http.StatusNotFound,
-			errOutput:      &errorHTTP{"Not found", http.StatusNotFound},
+			errOutput:      nil,
 			remotePokemons: nil,
 			remoteError:    &errorHTTP{"Not found", http.StatusNotFound},
 			localError:     nil,

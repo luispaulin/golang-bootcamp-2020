@@ -152,7 +152,7 @@ func (pr *pokemonRepository) Sync() (string, int, error) {
 	pokemons, err := pr.remoteSource.Get(pokemons)
 
 	if e, ok := err.(*errorHTTP); ok {
-		return e.status, e.code, e
+		return e.status, e.code, nil
 	} else if err != nil {
 		return "", 0, err
 	}
