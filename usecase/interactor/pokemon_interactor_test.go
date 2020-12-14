@@ -141,14 +141,16 @@ func Test_PokemonInteractor_Refresh(t *testing.T) {
 	pokemonInteractor := NewPokemonInteractor(pokemonRepository, pokemonPresenter)
 
 	for _, tt := range tests {
-		pokemonRepository.
-			On("Sync").
-			Return(tt.repoStatusOutput, tt.repoCodeOutput, tt.repoErrorOutput).
-			Once()
+		t.Run(tt.name, func(t *testing.T) {
+			pokemonRepository.
+				On("Sync").
+				Return(tt.repoStatusOutput, tt.repoCodeOutput, tt.repoErrorOutput).
+				Once()
 
-		status, code, err := pokemonInteractor.Refresh()
-		assert.Equal(t, tt.statusOutput, status)
-		assert.Equal(t, tt.codeOutput, code)
-		assert.Equal(t, tt.errorOutput, err)
+			status, code, err := pokemonInteractor.Refresh()
+			assert.Equal(t, tt.statusOutput, status)
+			assert.Equal(t, tt.codeOutput, code)
+			assert.Equal(t, tt.errorOutput, err)
+		})
 	}
 }

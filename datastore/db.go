@@ -20,6 +20,7 @@ func NewDB() (*os.File, *resty.Client, error) {
 		return nil, nil, err
 	}
 
+	// TODO put external API host in a Config
 	// HTTP client for pokemon API
 	client := resty.New().SetHostURL("https://pokeapi.co/api/v2/")
 

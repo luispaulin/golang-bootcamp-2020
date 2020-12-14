@@ -94,17 +94,20 @@ func Test_PokemonController_GetPokemons(t *testing.T) {
 	pokemonController := NewPokemonController(pokemonInteractor)
 
 	for _, tt := range tests {
-		pokemonInteractor.
-			On("Get", pokemons).
-			Return(tt.interactPokemonsOutput, tt.interactErrorOutput).
-			Once()
-		context.
-			On("JSON", http.StatusOK, tt.interactPokemonsOutput).
-			Return(tt.contextJSONErrorOutput).
-			Once()
+		t.Run(tt.name, func(t *testing.T) {
+			pokemonInteractor.
+				On("Get", pokemons).
+				Return(tt.interactPokemonsOutput, tt.interactErrorOutput).
+				Once()
+			context.
+				On("JSON", http.StatusOK, tt.interactPokemonsOutput).
+				Return(tt.contextJSONErrorOutput).
+				Once()
 
-		err := pokemonController.GetPokemons(context)
-		assert.Equal(t, tt.errorOutput, err)
+			err := pokemonController.GetPokemons(context)
+			assert.Equal(t, tt.errorOutput, err)
+		})
+
 	}
 }
 
@@ -150,20 +153,22 @@ func Test_PokemonController_SyncPokemons(t *testing.T) {
 	pokemonController := NewPokemonController(pokemonInteractor)
 
 	for _, tt := range tests {
-		pokemonInteractor.
-			On("Refresh").
-			Return(
-				tt.interactMessageOutput,
-				tt.interactCodeOutput,
-				tt.interactErrorOutput,
-			).Once()
+		t.Run(tt.name, func(t *testing.T) {
+			pokemonInteractor.
+				On("Refresh").
+				Return(
+					tt.interactMessageOutput,
+					tt.interactCodeOutput,
+					tt.interactErrorOutput,
+				).Once()
 
-		context.
-			On("JSON", tt.interactCodeOutput, tt.interactMessageOutput).
-			Return(tt.contextErrorOutput).
-			Once()
+			context.
+				On("JSON", tt.interactCodeOutput, tt.interactMessageOutput).
+				Return(tt.contextErrorOutput).
+				Once()
 
-		err := pokemonController.SyncPokemons(context)
-		assert.Equal(t, tt.errorOutput, err)
+			err := pokemonController.SyncPokemons(context)
+			assert.Equal(t, tt.errorOutput, err)
+		})
 	}
 }
