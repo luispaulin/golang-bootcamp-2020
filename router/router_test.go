@@ -86,7 +86,7 @@ func Test_EndpointsStatus(t *testing.T) {
 					Return(tt.controllerErrorOutput[key]).Once()
 			}
 			request, err := http.NewRequest("GET", tt.endpointCall, nil)
-			assert.NotNil(t, err)
+			assert.Nil(t, err)
 			if err != nil {
 				return
 			}
