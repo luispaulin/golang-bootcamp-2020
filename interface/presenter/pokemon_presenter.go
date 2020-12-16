@@ -1,8 +1,6 @@
 package presenter
 
-import (
-	"github.com/luispaulin/api-challenge/domain/model"
-)
+import "github.com/luispaulin/api-challenge/domain/model"
 
 type pokemonPresenter struct{}
 
@@ -16,6 +14,11 @@ func NewPokemonPresenter() PokemonPresenter {
 	return &pokemonPresenter{}
 }
 
+// ResponsePokemons to controller's format
 func (pp *pokemonPresenter) ResponsePokemons(pokemons []*model.Pokemon) []*model.Pokemon {
+	if pokemons == nil {
+		pokemons = make([]*model.Pokemon, 0)
+	}
+
 	return pokemons
 }

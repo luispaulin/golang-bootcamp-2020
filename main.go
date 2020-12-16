@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/labstack/echo"
 	"github.com/luispaulin/api-challenge/datastore"
 	"github.com/luispaulin/api-challenge/registry"
 	"github.com/luispaulin/api-challenge/router"
+
+	"github.com/labstack/echo"
 )
 
 func main() {
 	// Init file reader
-	file, err := datastore.NewDB()
+	file, client, err := datastore.NewDB()
 
 	if err != nil {
 		panic(err)
@@ -20,7 +21,7 @@ func main() {
 	defer file.Close()
 
 	// Init registry
-	r := registry.NewRegistry(file)
+	r := registry.NewRegistry(file, client)
 
 	// Init router
 	e := echo.New()

@@ -13,18 +13,19 @@ type pokemonInteractor struct {
 
 // PokemonInteractor for pokemons use cases
 type PokemonInteractor interface {
-	GET(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
+	Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error)
+	Refresh() (string, int, error)
 }
 
 // NewPokemonInteractor constructor
-// TODO: Good looking?
 func NewPokemonInteractor(
 	r repository.PokemonRepository,
 	p presenter.PokemonPresenter) PokemonInteractor {
 	return &pokemonInteractor{r, p}
 }
 
-func (po *pokemonInteractor) GET(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
+// Get pokemons from datastore
+func (po *pokemonInteractor) Get(pokemons []*model.Pokemon) ([]*model.Pokemon, error) {
 	pokemons, err := po.pokemonRepository.FindAll(pokemons)
 
 	if err != nil {
@@ -32,4 +33,15 @@ func (po *pokemonInteractor) GET(pokemons []*model.Pokemon) ([]*model.Pokemon, e
 	}
 
 	return po.pokemonPresenter.ResponsePokemons(pokemons), nil
+}
+
+// Refresh data operation with external source
+func (po *pokemonInteractor) Refresh() (string, int, error) {
+	message, code, err := po.pokemonRepository.Sync()
+
+	if err != nil {
+		return "", 0, err
+	}
+
+	return message, code, nil
 }
